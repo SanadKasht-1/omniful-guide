@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to Omniful WMS/OMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is structured as a single-page exploratory guide with a sticky top navigation for easy access to different thematic sections. This structure was chosen to transform the fragmented source notes into a logical, educational journey. The user can start with the high-level 'Order Lifecycle,' then dive into the 'Warehouse Anatomy,' understand the 'Inventory Flow,' and finally use the 'Key Concepts' glossary as a reference. This non-linear but guided approach is ideal for learning complex, interconnected processes, allowing users to explore at their own pace and revisit concepts easily, which is far more effective than a simple linear document. -->
+    <!-- Visualization & Content Choices: The source document is purely descriptive, so all visualizations are process and concept-oriented. The 'Order Lifecycle' and 'Inventory Flow' are presented as interactive, clickable step-by-step diagrams built with HTML/CSS to make the processes tangible. 'Warehouse Anatomy' uses a nested card layout to visually represent the physical hierarchy. 'Picking Methods' are shown in a comparative grid for easy differentiation. A searchable 'Key Concepts' glossary makes all definitions instantly accessible. These choices prioritize clarity, interaction, and learning without using any charts, SVG, or Mermaid JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #0ea5e9; /* sky-500 */
+            border-bottom-color: #0ea5e9; /* sky-500 */
+        }
+        .step-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .concept-card {
+             transition: all 0.3s ease;
+        }
+        .details-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .details-panel.open {
+            max-height: 1000px; /* Adjust as needed */
+            padding-top: 1rem;
+            padding-bottom: 1.5rem;
+        }
+        .process-arrow::after {
+            content: '→';
+            font-size: 2rem;
+            color: #94a3b8; /* slate-400 */
+            position: absolute;
+            right: -2.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        @media (max-width: 1024px) {
+            .process-arrow::after {
+                content: '↓';
+                right: 50%;
+                top: auto;
+                bottom: -2rem;
+                transform: translateX(50%);
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-slate-800">Omniful Explainer</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#introduction" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Intro</a>
+                        <a href="#lifecycle" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Order Lifecycle</a>
+                        <a href="#anatomy" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Warehouse Anatomy</a>
+                        <a href="#inventory" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Inventory Flow</a>
+                        <a href="#concepts" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Key Concepts</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:text-sky-500 hover:bg-slate-100 focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path id="menu-icon-open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                            <path id="menu-icon-close" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#introduction" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">Intro</a>
+                <a href="#lifecycle" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">Order Lifecycle</a>
+                <a href="#anatomy" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">Warehouse Anatomy</a>
+                <a href="#inventory" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">Inventory Flow</a>
+                <a href="#concepts" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">Key Concepts</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <!-- Introduction Section -->
+        <section id="introduction" class="text-center mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">Understanding Warehouse & Order Management</h2>
+            <p class="max-w-3xl mx-auto text-lg text-slate-600">
+                This guide interactively breaks down the core components and processes of the Omniful platform. Explore the journey of an order, the structure of a fulfillment center, the flow of inventory, and the key terms that power modern logistics. Click through the sections to learn more.
+            </p>
+        </section>
+
+        <!-- Order Lifecycle Section -->
+        <section id="lifecycle" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center text-slate-800 mb-2">The Order Lifecycle</h2>
+            <p class="text-center text-slate-600 mb-12 max-w-2xl mx-auto">From the customer's click to the package at their door, an order goes through several key stages managed by different systems. Click on each step to see the details.</p>
+            <div id="lifecycle-container" class="relative flex flex-col lg:flex-row justify-center items-center gap-16 lg:gap-12">
+            </div>
+        </section>
+
+        <!-- Warehouse Anatomy Section -->
+        <section id="anatomy" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center text-slate-800 mb-2">Anatomy of a Fulfillment Center</h2>
+            <p class="text-center text-slate-600 mb-12 max-w-2xl mx-auto">A warehouse is more than just shelves. In Omniful, it's a structured environment designed for maximum efficiency. Explore the hierarchy from the largest unit (Hub) down to the specific locations.</p>
+            <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                <div class="text-center border-b-2 border-sky-200 pb-4 mb-6">
+                    <h3 class="text-2xl font-bold text-sky-600">Hub</h3>
+                    <p class="text-slate-500">The primary order fulfillment center or warehouse.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                        <h4 class="text-xl font-semibold text-slate-700 mb-3">Zones</h4>
+                        <p class="text-slate-600 mb-4">A Hub is divided into logical Zones to organize the picking sequence and workflow. This is a crucial step between the Hub and its specific locations.</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                        <h4 class="text-xl font-semibold text-slate-700 mb-3">Locations</h4>
+                        <p class="text-slate-600 mb-4">Any specific place within the hub where inventory is stored or processes occur. Locations are categorized by their function.</p>
+                        <ul class="space-y-2">
+                            <li class="flex items-start"><span class="bg-teal-100 text-teal-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full mt-1">●</span><div><strong class="font-medium text-slate-800">Picking:</strong> Where items are retrieved to fulfill orders.</div></li>
+                            <li class="flex items-start"><span class="bg-amber-100 text-amber-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full mt-1">●</span><div><strong class="font-medium text-slate-800">Consolidation:</strong> Where items from different picking locations are grouped for an order.</div></li>
+                            <li class="flex items-start"><span class="bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full mt-1">●</span><div><strong class="font-medium text-slate-800">Back Storage:</strong> The main warehouse storage area for bulk inventory.</div></li>
+                            <li class="flex items-start"><span class="bg-rose-100 text-rose-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full mt-1">●</span><div><strong class="font-medium text-slate-800">Dark Store Specific:</strong> Special locations like Renew, Reliant, and Scrap.</div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Inventory Flow Section -->
+        <section id="inventory" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center text-slate-800 mb-2">Inbound Inventory Flow (Landing)</h2>
+            <p class="text-center text-slate-600 mb-12 max-w-2xl mx-auto">Before an item can be sold, it must be properly received and stored. This is the 'Landing' process. Click each step to understand how inventory enters the warehouse.</p>
+            <div id="inventory-container" class="relative flex flex-col lg:flex-row justify-center items-center gap-16 lg:gap-12">
+            </div>
+        </section>
+
+        <!-- Picking Methods Section -->
+        <section id="picking" class="mb-16 md:mb-24 scroll-mt-20">
+             <h2 class="text-3xl font-bold text-center text-slate-800 mb-2">Order Picking Methods</h2>
+            <p class="text-center text-slate-600 mb-12 max-w-2xl mx-auto">Picking is a critical warehouse function. Omniful supports various methods to optimize for different order types and operational needs.</p>
+            <div id="picking-methods-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            </div>
+        </section>
+
+
+        <!-- Key Concepts Section -->
+        <section id="concepts" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center text-slate-800 mb-2">Key Concepts Glossary</h2>
+            <p class="text-center text-slate-600 mb-8 max-w-2xl mx-auto">The world of logistics is full of acronyms and specific terms. Use the search below to quickly find definitions for key concepts within the Omniful ecosystem.</p>
+            <div class="mb-8 max-w-lg mx-auto">
+                <input id="search-input" type="text" placeholder="Search for a term (e.g., SKU, 3PL, GRN)..." class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sky-300 focus:border-sky-400 transition">
+            </div>
+            <div id="concepts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Concept cards will be injected here -->
+            </div>
+             <p id="no-results" class="text-center text-slate-500 hidden py-8">No matching concepts found.</p>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-800 text-slate-400 mt-20">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm">
+            <p>Interactive Guide created to explain Omniful concepts.</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Data
+    const lifecycleSteps = [
+        {
+            title: 'Order Placement',
+            icon: '🛒',
+            details: 'The journey begins when a customer places an order. This can happen through an integrated sales channel (like a website or marketplace) or be created manually in the dashboard by an admin.',
+            system: 'OMS'
+        },
+        {
+            title: 'Validation/Approval',
+            icon: '✅',
+            details: 'Before the warehouse team gets to work, an administrator validates the order to confirm its legitimacy and approves it for fulfillment.',
+            system: 'OMS/WMS'
+        },
+        {
+            title: 'Picking',
+            icon: '📦',
+            details: 'Warehouse staff (pickers) receive the order details and collect the specified items from their storage locations within the hub.',
+            system: 'WMS'
+        },
+        {
+            title: 'Packing',
+            icon: '🛍️',
+            details: 'The picked items are brought to a packing station, where they are checked, appropriately packaged, and labeled for shipment.',
+            system: 'WMS'
+        },
+        {
+            title: 'Shipping',
+            icon: '🚚',
+            details: 'The packed order is handed over to a courier or shipping partner. The system tracks the handover and the package\'s transit.',
+            system: 'WMS/OMS'
+        },
+        {
+            title: 'Delivery',
+            icon: '🏠',
+            details: 'The final step where the order successfully reaches the customer. The system records the delivery confirmation.',
+            system: 'OMS'
+        },
+        {
+            title: 'Returns',
+            icon: '↩️',
+            details: 'A separate but crucial process for handling items that are sent back by the customer, involving inspection, restocking, or other actions.',
+            system: 'OMS/WMS'
+        }
+    ];
+
+    const inventorySteps = [
+        {
+            title: 'Purchase Order (PO)',
+            icon: '📄',
+            details: 'A formal document issued by a seller to a supplier to order a specific quantity of inventory. This is the first step in acquiring stock.'
+        },
+        {
+            title: 'Gate Entry',
+            icon: '🚪',
+            details: 'This step acknowledges the physical receipt of the inventory delivery at the warehouse, often including details like the vehicle number and total number of cartons.'
+        },
+        {
+            title: 'Goods Received Note (GRN)',
+            icon: '🔍',
+            details: 'A detailed inspection process. The received items are checked against the Purchase Order for both quantity and quality to ensure accuracy.'
+        },
+        {
+            title: 'Putaway',
+            icon: ' shelved_book shelf',
+            details: 'After verification, the inventory is moved from the receiving area to its designated storage location within the hub (e.g., back storage or picking locations).'
+        }
+    ];
+
+    const pickingMethods = [
+        { title: 'Partial Picking', details: 'A single picker is assigned to retrieve only some of the items for a particular order.' },
+        { title: 'Complete Picking', details: 'A single picker is assigned to retrieve all of the items for a particular order.' },
+        { title: 'Segregated Picking', details: 'A picker collects items for multiple different orders simultaneously, but keeps them separated in different bins on their cart.' },
+        { title: 'Non-Segregated Picking', details: 'Also known as Bulk Picking. A picker collects items for multiple orders and places them all into a single, large bin. Sorting happens later.' }
+    ];
+
+    const concepts = [
+        { term: 'WMS', definition: 'Warehouse Management System. The software that manages and optimizes all warehouse operations, from inventory receiving to picking, packing, and shipping.' },
+        { term: 'OMS', definition: 'Order Management System. The software that handles the entire order lifecycle from the customer\'s perspective, including placement, tracking, and returns.' },
+        { term: 'TMS', definition: 'Transportation Management System. Software focused on managing the logistics of shipping and transportation.' },
+        { term: 'POS', definition: 'Point Of Sale. The system used in physical retail stores to process customer transactions.' },
+        { term: 'SKU', definition: 'Stock Keeping Unit. A unique code (product variant code) that identifies an exact product, including all its specific attributes like color, size, etc.' },
+        { term: '3PL', definition: '3rd Party Logistics Provider. A company that provides outsourced logistics services, including warehousing and fulfillment, to other businesses.' },
+        { term: 'Self-Tenancy', definition: 'A fulfillment model where the warehouse owner or seller is also the tenant using the Omniful software to manage their own inventory.' },
+        { term: 'GRN', definition: 'Goods Received Note. The formal process of checking received inventory for quantity and quality against a purchase order.' },
+        { term: 'STO', definition: 'Stock Transfer Order. A process for transferring self-owned inventory between different locations or sellers.' },
+        { term: 'GTIN', definition: 'Global Trade Item Number. A globally unique identifier for a trade item or product.' },
+        { term: 'Hub', definition: 'The main order fulfillment center or warehouse where inventory is stored and orders are processed.' },
+        { term: 'Kits', definition: 'Bundles or combos where multiple SKUs are grouped together and sold as a single unit.' },
+        { term: 'On-Hand Inventory', definition: 'The total amount of physical inventory available in the warehouse (in both picking and back storage locations) that has passed the GRN stage and is not yet shipped.' },
+        { term: 'Batch Inventory', definition: 'A method of managing inventory in groups (batches), typically used for products with expiry dates to ensure proper stock rotation.' },
+        { term: 'SKU Package Type', definition: 'Defines items that are sold as a pre-packaged bundle, like a case of soda or a pallet of furniture.' },
+    ];
+
+    // Functions to render dynamic content
+    function renderProcess(containerId, steps, hasDetails) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        steps.forEach((step, index) => {
+            const isLast = index === steps.length - 1;
+            const card = document.createElement('div');
+            card.className = `step-card w-full sm:w-2/3 lg:w-1/6 flex-grow-0 flex-shrink-0 bg-white rounded-xl shadow-md p-4 text-center border border-slate-200 cursor-pointer relative`;
+            
+            let arrowHtml = '';
+            if (!isLast) {
+                 arrowHtml = `<div class="process-arrow"></div>`;
+            }
+
+            card.innerHTML = `
+                <div class="text-4xl mb-3">${step.icon}</div>
+                <h4 class="font-semibold text-slate-800">${step.title}</h4>
+                ${step.system ? `<div class="mt-2 text-xs font-medium text-white bg-sky-500 rounded-full inline-block px-2 py-0.5">${step.system}</div>` : ''}
+                ${arrowHtml}
+            `;
+            
+            const detailsPanel = document.createElement('div');
+            detailsPanel.className = 'details-panel text-left';
+            detailsPanel.innerHTML = `<p class="text-slate-600 text-sm">${step.details}</p>`;
+
+            container.appendChild(card);
+            
+            if(hasDetails) {
+                const parentWrapper = document.createElement('div');
+                parentWrapper.className = 'w-full lg:w-auto';
+                parentWrapper.appendChild(card);
+                parentWrapper.appendChild(detailsPanel);
+                container.appendChild(parentWrapper);
+                card.addEventListener('click', () => {
+                     card.classList.toggle('ring-2');
+                     card.classList.toggle('ring-sky-400');
+                     detailsPanel.classList.toggle('open');
+                });
+            } else {
+                 container.appendChild(card);
+            }
+        });
+    }
+
+    function renderPickingMethods() {
+        const container = document.getElementById('picking-methods-container');
+        if (!container) return;
+        pickingMethods.forEach(method => {
+            container.innerHTML += `
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h4 class="text-lg font-semibold text-slate-800 mb-2">${method.title}</h4>
+                    <p class="text-slate-600">${method.details}</p>
+                </div>
+            `;
+        });
+    }
+
+    const conceptsGrid = document.getElementById('concepts-grid');
+    const searchInput = document.getElementById('search-input');
+    const noResults = document.getElementById('no-results');
+
+    function renderConcepts(filter = '') {
+        conceptsGrid.innerHTML = '';
+        const lowercasedFilter = filter.toLowerCase();
+        const filteredConcepts = concepts.filter(c => 
+            c.term.toLowerCase().includes(lowercasedFilter) || 
+            c.definition.toLowerCase().includes(lowercasedFilter)
+        );
+
+        if (filteredConcepts.length === 0) {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+
+        filteredConcepts.forEach(concept => {
+            const card = document.createElement('div');
+            card.className = 'concept-card bg-white rounded-lg shadow-sm border border-slate-200 p-6';
+            card.innerHTML = `
+                <h4 class="text-lg font-semibold text-slate-800 mb-2">${concept.term}</h4>
+                <p class="text-slate-600">${concept.definition}</p>
+            `;
+            conceptsGrid.appendChild(card);
+        });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+        renderConcepts(e.target.value);
+    });
+
+    // Mobile Menu Toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuIconOpen = document.getElementById('menu-icon-open');
+    const menuIconClose = document.getElementById('menu-icon-close');
+
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        menuIconOpen.classList.toggle('hidden');
+        menuIconClose.classList.toggle('hidden');
+    });
+    
+    // Close mobile menu on link click
+    mobileMenu.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+             mobileMenu.classList.add('hidden');
+             menuIconOpen.classList.remove('hidden');
+             menuIconClose.classList.add('hidden');
+        }
+    });
+
+
+    // Navigation link active state on scroll
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    function changeLinkState() {
+        let index = sections.length;
+
+        while(--index && window.scrollY + 100 < sections[index].offsetTop) {}
+        
+        navLinks.forEach((link) => link.classList.remove('active'));
+        // Find the corresponding link. The href attribute should match the section's id.
+        const activeLink = document.querySelector(`.nav-link[href="#${sections[index].id}"]`);
+        if(activeLink) {
+             activeLink.classList.add('active');
+        }
+    }
+    
+    window.addEventListener('scroll', changeLinkState);
+
+
+    // Initial Render
+    renderProcess('lifecycle-container', lifecycleSteps, true);
+    renderProcess('inventory-container', inventorySteps, true);
+    renderPickingMethods();
+    renderConcepts();
+    changeLinkState(); // Set initial active link
+});
+</script>
+</body>
+</html>
